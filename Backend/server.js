@@ -21,8 +21,7 @@ const pool = new Pool({
 async function createTable() {
   try {
     await pool.query(`
-
-      CREATE TABLE onboarding_records (
+      CREATE TABLE IF NOT EXISTS onboarding_records (
         id SERIAL PRIMARY KEY,
         emp_id VARCHAR(7) UNIQUE,
         full_name VARCHAR(50) NOT NULL,
@@ -72,10 +71,10 @@ async function createTable() {
         updated_at TIMESTAMP WITH TIME ZONE
       );
     `);
-    console.log('Table onboarding_records dropped and recreated successfully');
+    console.log('Table onboarding_records checked/created successfully');
   } catch (error) {
-    console.error('Error creating table:', error.message);
-    process.exit(1);
+    console.error('Error checking/creating table:', error.message);
+    throw error; // Let the caller handle the error
   }
 }
 
@@ -98,13 +97,20 @@ async function generateEmpId() {
 pool.connect()
   .then(async () => {
     console.log('Connected to PostgreSQL database');
-    await createTable();
+    try {
+      await createTable();
+    } catch (error) {
+      console.error('Failed to initialize database:', error.message);
+      process.exit(1); // Keep this if you want to exit on table creation failure
+    }
   })
   .catch(err => {
     console.error('Database connection error:', err);
     process.exit(1);
   });
 
+// ... (rest of your server.js remains unchanged)
+```
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     const uploadPath = path.join(__dirname, 'Uploads');
