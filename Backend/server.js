@@ -21,7 +21,8 @@ const pool = new Pool({
 async function createTable() {
   try {
     await pool.query(`
-      CREATE TABLE IF NOT EXISTS onboarding_records (
+
+      CREATE TABLE onboarding_records (
         id SERIAL PRIMARY KEY,
         emp_id VARCHAR(7) UNIQUE,
         full_name VARCHAR(50) NOT NULL,
@@ -71,10 +72,10 @@ async function createTable() {
         updated_at TIMESTAMP WITH TIME ZONE
       );
     `);
-    console.log('Table onboarding_records checked/created successfully');
+    console.log('Table onboarding_records dropped and recreated successfully');
   } catch (error) {
-    console.error('Error checking/creating table:', error.message);
-    throw error; // Let the caller handle the error
+    console.error('Error creating table:', error.message);
+    process.exit(1);
   }
 }
 
@@ -97,20 +98,13 @@ async function generateEmpId() {
 pool.connect()
   .then(async () => {
     console.log('Connected to PostgreSQL database');
-    try {
-      await createTable();
-    } catch (error) {
-      console.error('Failed to initialize database:', error.message);
-      process.exit(1); // Keep this if you want to exit on table creation failure
-    }
+    await createTable();
   })
   .catch(err => {
     console.error('Database connection error:', err);
     process.exit(1);
   });
 
-// ... (rest of your server.js remains unchanged)
-```
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     const uploadPath = path.join(__dirname, 'Uploads');
@@ -122,7 +116,7 @@ const storage = multer.diskStorage({
   filename: (req, file, cb) => {
     const sanitizedFileName = file.originalname.replace(/[<>:"/\\|?*]/g, '_').replace(/\s+/g, '_');
     const timestamp = Date.now();
-    const uniqueFileName = timestamp + "_" + sanitizedFileName;
+    const uniqueFileName = `${timestamp}_${sanitizedFileName}`;
     cb(null, uniqueFileName);
   }
 });
@@ -429,8 +423,5 @@ function getMimeType(fileName) {
 
 const PORT = process.env.PORT || 3820;
 app.listen(PORT, () => {
-  app.listen(PORT, '0.0.0.0', () => {
-  console.log(`Server running on http://0.0.0.0:${PORT}`);
-});
-
+  console.log(`Server running on http://13.127.108.218:${PORT}`);
 });
