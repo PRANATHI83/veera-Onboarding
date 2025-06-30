@@ -1,0 +1,60 @@
+version: '3.9'
+
+services:
+  postgres:
+    image: postgres:14
+    container_name: veera_onboarding_db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: admin234
+      POSTGRES_DB: employee_db
+    ports:
+      - "5860:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - veera_net
+
+  backend:
+    build: ./Backend
+    container_name: veera_onboarding_backend
+    ports:
+      - "3820:3820"
+    depends_on:
+      - postgres
+    volumes:
+      - ./Backend:/app
+    networks:
+      - veera_net
+
+  frontend:
+    build: ./Frontend
+    container_name: veera_onboarding_frontend
+    ports:
+      - "8057:80"
+    networks:
+      - veera_net
+
+  hr:
+    build: ./HR
+    container_name: veera_onboarding_hr
+    ports:
+      - "8058:80"
+    networks:
+      - veera_net
+
+  staff:
+    build: ./Staff
+    container_name: veera_onboarding_staff
+    ports:
+      - "8059:80"
+    networks:
+      - veera_net
+
+volumes:
+  pgdata:
+
+networks:
+  veera_net:
+
