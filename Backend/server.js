@@ -122,7 +122,7 @@ const storage = multer.diskStorage({
   filename: (req, file, cb) => {
     const sanitizedFileName = file.originalname.replace(/[<>:"/\\|?*]/g, '_').replace(/\s+/g, '_');
     const timestamp = Date.now();
-    const uniqueFileName = `${timestamp}_${sanitizedFileName}`;
+    const uniqueFileName = timestamp + "_" + sanitizedFileName;
     cb(null, uniqueFileName);
   }
 });
